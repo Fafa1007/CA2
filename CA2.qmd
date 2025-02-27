@@ -1,3 +1,17 @@
+The file CA2.csv contains 100 observations on 12 unknown variables. Consider this as some data matrix X. Using Singular Value Decomposition, find lower rank approximations of X for all ranks from 1 – 12
+
+```{r}
+data <- read.csv("CA2.csv")
+```
+
+```{r}
+s <- svd(data)
+svd_approx <- function(rank){
+  app <- s$u[,1:rank] %*% as.matrix(diag(s$d))[1:rank, 1:rank] %*% s$v[, 1:rank]
+  return(app)
+}
+```
+
 # Question 1
 
 ```{r}
