@@ -1,18 +1,85 @@
 The file CA2.csv contains 100 observations on 12 unknown variables. Consider this as some data matrix X. Using Singular Value Decomposition, find lower rank approximations of X for all ranks from 1 – 12
 
 ```{r}
-data <- read.csv("CA2.csv")
+X <- read.csv("CA2.csv")
 ```
 
 ```{r}
-s <- svd(data)
+s <- svd(X)
 svd_approx <- function(rank){
-  app <- s$u[,1:rank] %*% as.matrix(diag(s$d))[1:rank, 1:rank] %*% s$v[, 1:rank]
+  app <- s$u[,1:rank] %*% as.matrix((diag(s$d))[1:rank, 1:rank]) %*% t(s$v[, 1:rank])
   return(app)
 }
+X_k <- list()
+for (i in 1:12){
+  X_k[[i]] <- svd_approx(i)
+}
+X_k[[1]]
 ```
 
 # Question 1
+
+For each approximation $\tilde{X}_k$ of rank k, calculate the error, $\Delta _k=X-\tilde{X}_k$
+
+```{r}
+delta <- X - X_k[[4]]
+mean_delta <- colMeans(delta)
+as.matrix(mean_delta)
+```
+
+------------------------------------------------------------------------
+
+# Question 2
+
+Compare the correlation matrix of X with that of $\tilde{X}_2$and briefly interpret.
+
+```{r}
+library(ggcorrplot)
+x_cor <- round(cor(X), 1)
+ggcorrplot(x_cor, "square", lab = TRUE)
+
+x_2_cor <- round(cor(X_k[[2]]), 1)
+ggcorrplot(x_2_cor, "square", lab =TRUE)
+```
+
+------------------------------------------------------------------------
+
+# Question 3
+
+Calculate the Frobenius norm, defined as
+
+$$
+ ||A||_F= \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{m}|aij|^2}
+$$
+
+for $\Delta_k$, k =1,2.....12. Plot the Frobenius norm as a function of k and briefly describe your findings.
+
+```{r}
+X_k <- list()
+for(i in 1:12){
+  X_k[[i]] <- svd_approx(i)
+}
+
+FN <- c()
+Frobenius_Norm <- function(rank){
+   FN[rank]<- sqrt(sum(abs(X_k[[rank]]^2)))
+}
+
+for(i in 1:12){
+  FN[i] <- Frobenius_Norm(i)
+}
+
+df <- data.frame(x = 1:12, y = FN)
+library(ggplot2)
+ggplot(df, aes(x=x, y=y))+
+  geom_line()
+```
+
+\
+
+------------------------------------------------------------------------
+
+# Question 4
 
 ```{r}
 
