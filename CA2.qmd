@@ -1,19 +1,49 @@
 The file CA2.csv contains 100 observations on 12 unknown variables. Consider this as some data matrix X. Using Singular Value Decomposition, find lower rank approximations of X for all ranks from 1 – 12
 
 ```{r}
-data <- read.csv("CA2.csv")
+#| echo: false
+dat <- read.csv("CA2.csv")
 ```
 
 ```{r}
-s <- svd(data)
-svd_approx <- function(rank){
-  app <- s$u[,1:rank] %*% as.matrix(diag(s$d))[1:rank, 1:rank] %*% s$v[, 1:rank]
-  return(app)
+#| echo: false
+library(Matrix)
+s <- svd(dat)
+scd_approx <- function(rank){
+  app <- s$u[,1:rank] %*% as.matrix(diag(s$d)[1:rank, 1:rank]) %*% t(s$v[,1:rank])
+  app
 }
 ```
 
 # Question 1
 
 ```{r}
+#| eval: false
+library(knitr)
+X <- as.matrix(dat)
+delta_4 <- X - scd_approx(4)
+mean_error_vector <- colMeans(delta_4) |> round(4)
+kable(mean_error_vector)
+```
+
+# Question 2
+
+```{r}
+#| eval: false
+X2_approx <- scd_approx(2)
+corr_X <- cor(X)
+corr_X2 <- cor(X2_approx)
+kable(round(corr_X, 4), caption = "Correlation Matrix of X")
+kable(round(corr_X2, 4), caption = "Correlation Matrix of Rank-2 Approximation")
+corr_diff <- abs(corr_X - corr_X2)
+kable(round(corr_diff, 4), caption = "Absolute Differences in Correlation Matrices")
 
 ```
+
+-   Some values in the table are quite large (e.g., 0.9768 for V4, V9 and 0.9541 for V7, V9), showing that the correlation between those variable pairs has significantly changed in the low-rank approximation. This suggests that the rank-2 approximation fails to retain relationships in the data.
+
+-   Some values are close to 0 (e.g., 0.0197 for V6, V9), meaning the rank-2 approximation preserves these relationships well.
+
+<!-- -->
+
+-   The closer these values are to zero, the more accurately the rank-2 approximation maintains the correlation structure.
