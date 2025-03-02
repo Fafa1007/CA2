@@ -1,5 +1,6 @@
 ---
-title: "CA2 Chris"
+title: "CA2"
+author: "Chris Eason, Dongook Kim, Rongyu Zhang"
 format: pdf
 ---
 
@@ -50,12 +51,13 @@ library(ggcorrplot)
 library(patchwork)
 
 x_cor <- round(cor(X), 1)
-p1 <- ggcorrplot(x_cor, "square", lab = TRUE, title = "Original X Matrix")
+p1 <- ggcorrplot(x_cor, "square", lab = TRUE, title = "Original X Matrix", lab_size = 3)
 
 x_2_cor <- round(cor(X_k[[2]]), 1)
-p2 <- ggcorrplot(x_2_cor, "square", lab =TRUE, title = "Approximated X Matrix Using \nRank 2")
+p2 <- ggcorrplot(x_2_cor, "square", lab =TRUE, title = "Approximated X Matrix Using \nRank 2", lab_size =2)
 
-p1 + p2
+p1
+p2
 ```
 
 **Interpretation:**
