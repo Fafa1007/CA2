@@ -10,6 +10,8 @@ The file CA2.csv contains 100 observations on 12 unknown variables. Consider thi
 X <- read.csv("CA2.csv")
 ```
 
+For each approximation $\tilde{X}_k$ of rank k, calculate the error, $\Delta _k=X-\tilde{X}_k$
+
 ```{r}
 s <- svd(X)
 svd_approx <- function(rank){
@@ -23,7 +25,7 @@ for (i in 1:12){
   X_k[[i]] <- svd_approx(i)
 }
 
-# For each Approximation of X in Rank K
+# For each Approximation of X in Rank K, calculate delta the error
 delta <- list()
 for(i in 1:12){
   delta[[i]] <- X - X_k[[i]]
@@ -33,11 +35,14 @@ for(i in 1:12){
 
 # Question 1
 
-For each approximation $\tilde{X}_k$ of rank k, calculate the error, $\Delta _k=X-\tilde{X}_k$
+Consider the rank 4 approximation. Report the mean vector of the approximation error, i.e. $\Delta_4$
 
 ```{r}
-mean_delta <- colMeans(delta[[4]])
-as.matrix(mean_delta)
+library(knitr)
+mean_delta <- colMeans(delta[[4]]) 
+kable(as.matrix(round(mean_delta,3)), 
+      col.names = "Mean_Error",
+      caption = "Mean Vector of the Rank 4 Approximation")
 ```
 
 ------------------------------------------------------------------------
@@ -51,10 +56,24 @@ library(ggcorrplot)
 library(patchwork)
 
 x_cor <- round(cor(X), 1)
-p1 <- ggcorrplot(x_cor, "square", lab = TRUE, title = "Original X Matrix", lab_size = 3)
+p1 <- ggcorrplot(x_cor, "square", lab = TRUE, 
+                 title = "Correlation Coefficient Plot
+For The Original X Matrix", lab_size = 3) +
+  labs(caption = "Figure 2") +
+  theme(
+      axis.text.x = element_text(size = 8),
+      axis.text.y = element_text(size = 8)
+  )
 
 x_2_cor <- round(cor(X_k[[2]]), 1)
-p2 <- ggcorrplot(x_2_cor, "square", lab =TRUE, title = "Approximated X Matrix Using \nRank 2", lab_size =2)
+p2 <- ggcorrplot(x_2_cor, "square", lab =TRUE, 
+                 title = "Correlation Coefficient Plot
+For The Approximated X Matrix Using Rank 2", lab_size =2)+
+  labs(caption = "Figure 3") + 
+  theme(
+      axis.text.x = element_text(size = 8),
+      axis.text.y = element_text(size = 8)
+  )
 
 p1
 p2
@@ -64,7 +83,7 @@ p2
 
 1.  The original data shows that most of the variables are uncorrelated, the rank 2 approximation shows that they are corerlated. For example with V6 and V8 in the original matrix are uncorrelated while the rank 2 approximation correlation coefficient is 0.6.
 2.  The original data shows slight correlations between variables with each other while the rank 2 approximation of X exagerates these correaltions. For example with V12 and V11 in the original matrix is -0.2 while the rank 2 approximation is -0.9.
-3.  The rank 2 captures the 2 largest singular values and therefore attempts to capture a majority of the variation in the original X matrix but discards the other higher order variations. Therefore the rank 2 approximation has altered some of the structures in the data and has affected the relationships between variables, changing their correlation coefficients.
+3.  The rank 2 approximation captures the 2 largest singular values and therefore attempts to capture a majority of the variation in the original X matrix but discards the other variation captured by the other variables . Therefore the rank 2 approximation has altered some of the structures in the data and has affected the relationships between variables, changing their correlation coefficients.
 
 ------------------------------------------------------------------------
 
@@ -91,19 +110,21 @@ for(i in 1:12){
 df <- data.frame(x = 1:12, y = FN)
 library(ggplot2)
 ggplot(df, aes(x=x, y=y))+
+  geom_point(color="red") +
   geom_line() +
   labs (
-    title = "Frobenius Norm Plot For Delta Error of \n
-    Rank k = 1...12 approximations of X", 
+    title = "Frobenius Norm Plot For Delta Error of
+Rank k = 1...12 approximations of X", 
     x = "Rank k", 
-    y = "Frobenius Norm"
+    y = "Frobenius Norm", 
+    caption = "Figure 4"
   )
 ```
 
 **Interpretation:**
 
 1.  Decreasing (almost linear) trend of the Frobenius Norm as the the approximation of rank K increases.
-2.  In other words, the delta error between the original matrix and the approximated rank K matrix decreases as the approximation gets closer to rank 12, where the original data set and the approximation are equal and the error is zero.\
+2.  In other words, as the rank of the approximated matrix increases and more eigenvalues are included, the delta error between the original matrix and the rank k approximation decreases, approaching zero at rank 12, where the approximation matches the original dataset exactly.\
 
 ------------------------------------------------------------------------
 
@@ -122,21 +143,23 @@ for (i in 1:12){
 df <- data.frame(x = 1:12, y = retained_var)
 library(ggplot2)
 ggplot(df, aes(x=x, y=y))+
+  geom_point(color="red")+
   geom_line() +
   labs (
-    title = "Percentage of the total variation in X
-    that is retained for each rank K approximation of X", 
+    title = "Cumulative Percentage of the total variation in X
+that is retained for each rank K approximation of X", 
     x = "Rank k", 
-    y = "Percentage of Variance Retained"
+    y = "Cumulative Percentage of Variance Retained (%)", 
+    caption = "Figure 5"
   )
 
-print(paste("Percentage of variance retained rank 7:", round(retained_var[8],2)))
+print(paste("Percentage of variance retained rank 8:", round(retained_var[8],2)))
 ```
 
 **Interpretation**
 
 1.  The amount of variation in the original matrix retained increasing at a decreasing rate by the rank k approximation as the the approximation of rank K increases.
 
-2.  This makes sense as we use more eigenvalues to approximate our original matrix, we keep more and more of the variation in the original matrix.
+2.  This makes sense as we use more eigenvalues to approximate our original matrix, we keep more and more of the variation in the original matrix until the approximation and the original matrix are equal.
 
 3.  Shows that by the time the rank k = rank 8, the approximation basically retains 92% of the variation of in the original matrix. Therefore using rank 8 approximation captures most of the data structures in the original matrix while being in lower dimensions and removing some of the linear dependencies between variables.
